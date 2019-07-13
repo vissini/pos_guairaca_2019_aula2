@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Admin\Product;
+use App\Http\Requests\ProductRequest;
+
 class ProductController extends Controller
 {
     /**
@@ -12,10 +14,21 @@ class ProductController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    private $totalPage = 3;
+
     public function index()
     {
+        //$prod = Product::withTrashed()->get();
+        //$prod = Product::onlyTrashed()->get();
+        //dd($prod);
+        $prod = Product::withTrashed()->find(2);
+        $prod->restore();
+        //echo $prod->trashed();
+        exit;
+
         $product = new Product;
-        $products = $product->all();
+        //$products = $product->ofType('moveis')->paginate($this->totalPage);
+        $products = $product->paginate($this->totalPage);
         $title = 'Lista de Produtos';
         return view('admin.products.index', compact('products', 'title'));                                
     }
@@ -62,15 +75,25 @@ class ProductController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(ProductRequest $request)
     {
+        
         $dataForm = $request->all();
+        //$dataForm = $request->only(['campo']);
+        //$dataForm = $request->except(['campo']);
+        //$dataForm = $request->input('campo');
+        //$dataForm = $request->input('campo','valor Padrão');
+
+        //$dataForm['active'] = isset($dataForm['active'])?1:0;
+        $dataForm['active'] = $request->has('active');
+
+    
         $product = new Product;
         $insert = $product->create($dataForm);
         if($insert){
-            return redirect()->route('products.index');
+            return redirect()->route('products.index')->with('success','Produto Inserido com Sucesso!');
         }else{
-            return redirect()->route('products.create');
+            return redirect()->route('products.create')->with('error','Erro ao inserir o Produto!');;
         }
     }
 
@@ -91,10 +114,14 @@ class ProductController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Product $product)
     {
-        $product = new Product();
-        $prod = $product->find($id);
+
+        // $product = new Product();
+        // $prod = $product->findOrFail($id);
+        //$prod = $product->find($id);
+        //$prod = Product::findOrFail($id);
+        $prod = $product;
         $title = "Editar Produto - {$prod->name}";
         return view('admin.products.edit', compact('prod','title'));
     }
@@ -106,17 +133,17 @@ class ProductController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(ProductRequest $request, Product $product)
     {
-        $product = new Product();
-        $prod = $product->find($id);
+        // $product = new Product();
+        // $prod = $product->find($id);
         $dataForm = $request->all();
-        $update = $prod->update($dataForm);
+        $update = $product->update($dataForm);
 
         if($update){
             return redirect()->route('products.index');
         }else{
-            return redirect()->route('products.edit', $prod->id);
+            return redirect()->route('products.edit', $product->id);
         }
     }
 
@@ -135,5 +162,18 @@ class ProductController extends Controller
         }else{
             return redirect()->route('products.index');
         }
+    }
+
+    protected function _validate(Request $request, $productId=null)
+    {
+        $this->validate($request,[
+            'name' => 'required|min:3|max:100',
+            'number' => "required|numeric|unique:products,number,{$productId}",
+            'category' => 'required',
+            'description' => 'min:3|max:500|nullable' 
+        ],
+        [
+            'number.required' => 'O Campo Número é obrigatório'
+        ]);
     }
 }

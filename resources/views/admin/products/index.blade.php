@@ -2,6 +2,7 @@
 @section('content')
     <a class="btn btn-primary" href="{{ route('products.create') }}">Adicionar Produto</a>
     <br><br>
+    {{ session('success') }}
     <table class="table">
         <thead>
             <tr>
@@ -17,7 +18,7 @@
         <tr>
             <td>{{ $product->name }}</td>
             <td>{{ $product->number }}</td>
-            <td>{{ $product->active }}</td>
+            <td>{{ $product->active }} - {{ $product->active_formatted }}</td>
             <td>{{ $product->category }}</td>
             <td style="width: 180px;">
                 <a class="btn btn-primary" href="{{ route('products.edit', $product->id) }}">Editar</a>
@@ -36,4 +37,20 @@
     @endforelse    
         </tbody>
     </table>
+    {!! $products->links() !!}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @endsection
