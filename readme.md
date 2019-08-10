@@ -1,9 +1,7 @@
-#title
 <h1>Aula 2 - PHP com Laravel - Pós Desenvolvimento de Aplicações Web - Guairacá</h1>
 
 <p>Neste aula aprendemos como fazer um crud completo em Laravel.</p>
 
-#instalacao
 <h3>Instalação</h3>
 
 Para instalar clonar o projeto, acessar a pasta e seguir os seguintes passos
